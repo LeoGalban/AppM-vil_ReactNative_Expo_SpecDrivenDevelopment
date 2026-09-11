@@ -3,10 +3,10 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import EstadoCarga from "../../components/EstadoCarga";
 import FormularioGasto from "../../components/FormularioGasto";
-import { COLOR_POR_CATEGORIA, EMOJI_POR_CATEGORIA } from "../../constants/categorias";
 import { COLORES } from "../../constants/colores";
+import { listarCategorias } from "../../services/categoriasService";
 import { DatosGasto, editarGasto, eliminarGasto, obtenerGasto } from "../../services/gastosService";
-import { Gasto } from "../../types/gasto";
+import { Categoria, Gasto } from "../../types/gasto";
 
 function formatearMonto(monto: number): string {
   return `$${monto.toLocaleString("es-AR")}`;
@@ -22,16 +22,18 @@ export default function PantallaDetalleGasto() {
   const router = useRouter();
 
   const [gasto, setGasto] = useState<Gasto | null>(null);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [cargando, setCargando] = useState(true);
   const [editando, setEditando] = useState(false);
 
   useEffect(() => {
-    obtenerGasto(id).then((encontrado) => {
+    Promise.all([obtenerGasto(id), listarCategorias()]).then(([encontrado, datosCategorias]) => {
       if (!encontrado) {
         router.replace("/");
         return;
       }
       setGasto(encontrado);
+      setCategorias(datosCategorias);
       setCargando(false);
     });
   }, [id, router]);
@@ -55,17 +57,20 @@ export default function PantallaDetalleGasto() {
     ]);
   }
 
-  if (cargando || !gasto) {
+  const categoria = gasto ? categorias.find((c) => c.id === gasto.categoriaId) : undefined;
+
+  if (cargando || !gasto || !categoria) {
     return <EstadoCarga mensaje="Buscando el gasto..." />;
   }
 
   if (editando) {
     return (
       <FormularioGasto
+        categorias={categorias}
         valoresIniciales={{
           monto: gasto.monto,
           descripcion: gasto.descripcion,
-          categoria: gasto.categoria,
+          categoriaId: gasto.categoriaId,
         }}
         onGuardar={guardarEdicion}
         textoBoton="Guardar cambios"
@@ -73,19 +78,17 @@ export default function PantallaDetalleGasto() {
     );
   }
 
-  const colorCategoria = COLOR_POR_CATEGORIA[gasto.categoria];
-
   return (
     <View style={estilos.contenedor}>
-      <View style={[estilos.icono, { backgroundColor: `${colorCategoria}1A` }]}>
-        <Text style={estilos.emoji}>{EMOJI_POR_CATEGORIA[gasto.categoria]}</Text>
+      <View style={[estilos.icono, { backgroundColor: `${categoria.color}1A` }]}>
+        <Text style={estilos.emoji}>{categoria.emoji}</Text>
       </View>
 
       <Text style={estilos.monto}>{formatearMonto(gasto.monto)}</Text>
       <Text style={estilos.descripcion}>{gasto.descripcion}</Text>
 
       <View style={estilos.filaInfo}>
-        <Text style={[estilos.categoria, { color: colorCategoria }]}>{gasto.categoria}</Text>
+        <Text style={[estilos.categoria, { color: categoria.color }]}>{categoria.nombre}</Text>
         <Text style={estilos.separador}>·</Text>
         <Text style={estilos.fecha}>{formatearFecha(gasto.fecha)}</Text>
       </View>

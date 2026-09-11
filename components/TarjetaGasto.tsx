@@ -1,10 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { COLORES } from "../constants/colores";
-import { COLOR_POR_CATEGORIA, EMOJI_POR_CATEGORIA } from "../constants/categorias";
-import { Gasto } from "../types/gasto";
+import { Categoria, Gasto } from "../types/gasto";
 
 type Props = {
   gasto: Gasto;
+  categoria: Categoria;
   onPress?: () => void;
 };
 
@@ -17,16 +17,14 @@ function formatearFecha(fecha: string): string {
   return `${dia}/${mes}/${anio}`;
 }
 
-export default function TarjetaGasto({ gasto, onPress }: Props) {
-  const colorCategoria = COLOR_POR_CATEGORIA[gasto.categoria];
-
+export default function TarjetaGasto({ gasto, categoria, onPress }: Props) {
   return (
     <Pressable
       style={({ pressed }) => [estilos.tarjeta, pressed && estilos.tarjetaPresionada]}
       onPress={onPress}
     >
-      <View style={[estilos.iconoCategoria, { backgroundColor: `${colorCategoria}1A` }]}>
-        <Text style={estilos.emoji}>{EMOJI_POR_CATEGORIA[gasto.categoria]}</Text>
+      <View style={[estilos.iconoCategoria, { backgroundColor: `${categoria.color}1A` }]}>
+        <Text style={estilos.emoji}>{categoria.emoji}</Text>
       </View>
 
       <View style={estilos.info}>
@@ -34,7 +32,7 @@ export default function TarjetaGasto({ gasto, onPress }: Props) {
           {gasto.descripcion}
         </Text>
         <View style={estilos.filaInferior}>
-          <Text style={[estilos.categoria, { color: colorCategoria }]}>{gasto.categoria}</Text>
+          <Text style={[estilos.categoria, { color: categoria.color }]}>{categoria.nombre}</Text>
           <Text style={estilos.separador}>·</Text>
           <Text style={estilos.fecha}>{formatearFecha(gasto.fecha)}</Text>
         </View>

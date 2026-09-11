@@ -1,10 +1,11 @@
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
+import { PieChart } from "react-native-chart-kit";
 import EstadoCarga from "../components/EstadoCarga";
 import EstadoVacio from "../components/EstadoVacio";
-import { COLOR_POR_CATEGORIA, EMOJI_POR_CATEGORIA } from "../constants/categorias";
 import { COLORES } from "../constants/colores";
+import { listarCategorias } from "../services/categoriasService";
 import { listarGastos } from "../services/gastosService";
 import { Categoria, Gasto } from "../types/gasto";
 
@@ -12,25 +13,36 @@ function formatearMonto(monto: number): string {
   return `$${monto.toLocaleString("es-AR")}`;
 }
 
-function calcularTotalesPorCategoria(gastos: Gasto[]): { categoria: Categoria; total: number }[] {
-  const totales = new Map<Categoria, number>();
+type TotalPorCategoria = {
+  categoria: Categoria;
+  total: number;
+};
+
+function calcularTotalesPorCategoria(gastos: Gasto[], categorias: Categoria[]): TotalPorCategoria[] {
+  const totales = new Map<string, number>();
   for (const gasto of gastos) {
-    totales.set(gasto.categoria, (totales.get(gasto.categoria) ?? 0) + gasto.monto);
+    totales.set(gasto.categoriaId, (totales.get(gasto.categoriaId) ?? 0) + gasto.monto);
   }
   return [...totales.entries()]
-    .map(([categoria, total]) => ({ categoria, total }))
+    .map(([categoriaId, total]) => {
+      const categoria = categorias.find((c) => c.id === categoriaId);
+      return categoria ? { categoria, total } : null;
+    })
+    .filter((item): item is TotalPorCategoria => item !== null)
     .sort((a, b) => b.total - a.total);
 }
 
 export default function PantallaResumen() {
   const [gastos, setGastos] = useState<Gasto[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
       setCargando(true);
-      listarGastos().then((datos) => {
-        setGastos(datos);
+      Promise.all([listarGastos(), listarCategorias()]).then(([datosGastos, datosCategorias]) => {
+        setGastos(datosGastos);
+        setCategorias(datosCategorias);
         setCargando(false);
       });
     }, [])
@@ -45,7 +57,17 @@ export default function PantallaResumen() {
   }
 
   const totalGeneral = gastos.reduce((acumulado, gasto) => acumulado + gasto.monto, 0);
-  const totalesPorCategoria = calcularTotalesPorCategoria(gastos);
+  const totalesPorCategoria = calcularTotalesPorCategoria(gastos, categorias);
+
+  const datosGrafico = totalesPorCategoria.map(({ categoria, total }) => ({
+    name: categoria.nombre,
+    population: total,
+    color: categoria.color,
+    legendFontColor: COLORES.texto,
+    legendFontSize: 13,
+  }));
+
+  const anchoPantalla = Dimensions.get("window").width;
 
   return (
     <ScrollView style={estilos.contenedor} contentContainerStyle={estilos.contenido}>
@@ -54,20 +76,34 @@ export default function PantallaResumen() {
         <Text style={estilos.montoTotal}>{formatearMonto(totalGeneral)}</Text>
       </View>
 
+      <PieChart
+        data={datosGrafico}
+        width={anchoPantalla - 32}
+        height={200}
+        accessor="population"
+        backgroundColor="transparent"
+        paddingLeft="0"
+        chartConfig={{ color: () => COLORES.texto }}
+      />
+
       <Text style={estilos.subtitulo}>Por categoría</Text>
 
       {totalesPorCategoria.map(({ categoria, total }) => {
-        const color = COLOR_POR_CATEGORIA[categoria];
         const porcentaje = Math.round((total / totalGeneral) * 100);
         return (
-          <View key={categoria} style={estilos.filaCategoria}>
-            <View style={[estilos.icono, { backgroundColor: `${color}1A` }]}>
-              <Text style={estilos.emoji}>{EMOJI_POR_CATEGORIA[categoria]}</Text>
+          <View key={categoria.id} style={estilos.filaCategoria}>
+            <View style={[estilos.icono, { backgroundColor: `${categoria.color}1A` }]}>
+              <Text style={estilos.emoji}>{categoria.emoji}</Text>
             </View>
             <View style={estilos.infoCategoria}>
-              <Text style={estilos.nombreCategoria}>{categoria}</Text>
+              <Text style={estilos.nombreCategoria}>{categoria.nombre}</Text>
               <View style={estilos.barraFondo}>
-                <View style={[estilos.barraProgreso, { width: `${porcentaje}%`, backgroundColor: color }]} />
+                <View
+                  style={[
+                    estilos.barraProgreso,
+                    { width: `${porcentaje}%`, backgroundColor: categoria.color },
+                  ]}
+                />
               </View>
             </View>
             <Text style={estilos.montoCategoria}>{formatearMonto(total)}</Text>

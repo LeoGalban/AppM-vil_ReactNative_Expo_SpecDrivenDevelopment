@@ -1,18 +1,12 @@
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { CATEGORIAS, COLOR_POR_CATEGORIA, EMOJI_POR_CATEGORIA } from "../constants/categorias";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import SelectorCategoria from "./SelectorCategoria";
 import { COLORES } from "../constants/colores";
 import { DatosGasto } from "../services/gastosService";
 import { Categoria } from "../types/gasto";
 
 type Props = {
+  categorias: Categoria[];
   valoresIniciales?: DatosGasto;
   onGuardar: (datos: DatosGasto) => Promise<void>;
   textoBoton?: string;
@@ -24,10 +18,17 @@ type Errores = {
   categoria?: string;
 };
 
-export default function FormularioGasto({ valoresIniciales, onGuardar, textoBoton = "Guardar" }: Props) {
+export default function FormularioGasto({
+  categorias,
+  valoresIniciales,
+  onGuardar,
+  textoBoton = "Guardar",
+}: Props) {
   const [monto, setMonto] = useState(valoresIniciales ? String(valoresIniciales.monto) : "");
   const [descripcion, setDescripcion] = useState(valoresIniciales?.descripcion ?? "");
-  const [categoria, setCategoria] = useState<Categoria | null>(valoresIniciales?.categoria ?? null);
+  const [categoriaId, setCategoriaId] = useState<string | null>(
+    valoresIniciales?.categoriaId ?? null
+  );
   const [errores, setErrores] = useState<Errores>({});
   const [guardando, setGuardando] = useState(false);
 
@@ -41,7 +42,7 @@ export default function FormularioGasto({ valoresIniciales, onGuardar, textoBoto
     if (descripcion.trim().length < 3) {
       nuevosErrores.descripcion = "La descripción debe tener al menos 3 caracteres.";
     }
-    if (!categoria) {
+    if (!categoriaId) {
       nuevosErrores.categoria = "Elegí una categoría.";
     }
     return nuevosErrores;
@@ -50,7 +51,7 @@ export default function FormularioGasto({ valoresIniciales, onGuardar, textoBoto
   async function manejarGuardar() {
     const nuevosErrores = validar();
     setErrores(nuevosErrores);
-    if (Object.keys(nuevosErrores).length > 0 || !categoria) {
+    if (Object.keys(nuevosErrores).length > 0 || !categoriaId) {
       return;
     }
 
@@ -58,7 +59,7 @@ export default function FormularioGasto({ valoresIniciales, onGuardar, textoBoto
     await onGuardar({
       monto: Number(monto.replace(",", ".")),
       descripcion: descripcion.trim(),
-      categoria,
+      categoriaId,
     });
     setGuardando(false);
   }
@@ -85,28 +86,11 @@ export default function FormularioGasto({ valoresIniciales, onGuardar, textoBoto
       {errores.descripcion && <Text style={estilos.textoError}>{errores.descripcion}</Text>}
 
       <Text style={estilos.etiqueta}>Categoría</Text>
-      <View style={estilos.filaCategorias}>
-        {CATEGORIAS.map((opcion) => {
-          const seleccionada = categoria === opcion;
-          const color = COLOR_POR_CATEGORIA[opcion];
-          return (
-            <Pressable
-              key={opcion}
-              style={[
-                estilos.chip,
-                { borderColor: color },
-                seleccionada && { backgroundColor: color },
-              ]}
-              onPress={() => setCategoria(opcion)}
-            >
-              <Text style={estilos.chipEmoji}>{EMOJI_POR_CATEGORIA[opcion]}</Text>
-              <Text style={[estilos.chipTexto, { color: seleccionada ? "#fff" : color }]}>
-                {opcion}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <SelectorCategoria
+        categorias={categorias}
+        categoriaSeleccionadaId={categoriaId}
+        onSeleccionar={(categoria) => setCategoriaId(categoria.id)}
+      />
       {errores.categoria && <Text style={estilos.textoError}>{errores.categoria}</Text>}
 
       <Pressable
@@ -147,27 +131,6 @@ const estilos = StyleSheet.create({
     color: COLORES.error,
     fontSize: 13,
     marginTop: 4,
-  },
-  filaCategorias: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 1.5,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipEmoji: {
-    fontSize: 14,
-  },
-  chipTexto: {
-    fontSize: 13,
-    fontWeight: "600",
   },
   boton: {
     backgroundColor: COLORES.primario,

@@ -1,9 +1,14 @@
-export type Categoria = "Comida" | "Transporte" | "Servicios" | "Ocio" | "Otros";
+export type Categoria = {
+  id: string;
+  nombre: string;
+  color: string;
+  emoji: string;
+};
 
 export type Gasto = {
   id: string;
   monto: number;
   descripcion: string;
-  categoria: Categoria;
+  categoriaId: string;
   fecha: string;
 };

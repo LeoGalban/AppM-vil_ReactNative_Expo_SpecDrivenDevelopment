@@ -1,9 +1,9 @@
-import { Categoria, Gasto } from "../types/gasto";
+import { Gasto } from "../types/gasto";
 
 export type DatosGasto = {
   monto: number;
   descripcion: string;
-  categoria: Categoria;
+  categoriaId: string;
 };
 
 const LATENCIA_MIN_MS = 500;
@@ -14,21 +14,21 @@ let gastos: Gasto[] = [
     id: "1",
     monto: 8500,
     descripcion: "Supermercado",
-    categoria: "Comida",
+    categoriaId: "comida",
     fecha: "2026-09-08",
   },
   {
     id: "2",
     monto: 1200,
     descripcion: "Colectivo",
-    categoria: "Transporte",
+    categoriaId: "transporte",
     fecha: "2026-09-09",
   },
   {
     id: "3",
     monto: 15000,
     descripcion: "Factura de luz",
-    categoria: "Servicios",
+    categoriaId: "servicios",
     fecha: "2026-09-10",
   },
 ];
