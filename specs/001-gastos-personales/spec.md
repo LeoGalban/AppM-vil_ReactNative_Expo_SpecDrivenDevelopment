@@ -107,23 +107,71 @@ listado.
 
 ---
 
-### User Story 5 - Ver un resumen de gastos (Priority: P3)
+### User Story 5 - Ver un resumen de gastos con gráfico (Priority: P3)
 
-Como usuario quiero ver el total gastado y el total por categoría, para entender rápido en qué
-estoy gastando más.
+Como usuario quiero ver el total gastado, el total por categoría y un gráfico de torta, para
+entender rápido en qué estoy gastando más.
 
 **Why this priority**: Es información derivada de las otras historias, por lo que se prioriza al
 final aunque suma valor de análisis.
 
 **Independent Test**: Se puede probar sola cargando varios gastos de distintas categorías y
-verificando que el resumen calcula el total general y el total por cada categoría correctamente.
+verificando que el resumen calcula el total general, el total por cada categoría y que el gráfico
+representa esas proporciones correctamente.
 
 **Acceptance Scenarios**:
 
 1. **Given** hay gastos cargados en más de una categoría, **When** el usuario abre la pantalla de
-   resumen, **Then** ve el total general y un total independiente por cada categoría con gastos.
+   resumen, **Then** ve el total general, un total independiente por cada categoría con gastos, y
+   un gráfico de torta con una porción por categoría.
 2. **Given** no hay ningún gasto cargado, **When** el usuario abre la pantalla de resumen,
-   **Then** ve un estado vacío en lugar de totales en cero sin contexto.
+   **Then** ve un estado vacío en lugar de totales o gráfico en cero sin contexto.
+
+---
+
+### User Story 6 - Ver los gastos en un calendario (Priority: P4)
+
+Como usuario quiero ver un calendario mensual con los días que tienen gastos marcados, y tocar un
+día para ver los gastos de esa fecha puntual.
+
+**Why this priority**: Es una forma alternativa de explorar los mismos datos que ya existen desde
+el listado; no es indispensable para el flujo principal, por eso queda última en prioridad.
+
+**Independent Test**: Se puede probar sola cargando gastos en distintas fechas del mes actual y
+verificando que el calendario marca esos días, y que tocar uno muestra únicamente los gastos de
+esa fecha.
+
+**Acceptance Scenarios**:
+
+1. **Given** hay gastos cargados en distintos días del mes, **When** el usuario abre el
+   calendario, **Then** ve marcados únicamente los días que tienen al menos un gasto.
+2. **Given** el calendario visible, **When** el usuario toca un día marcado, **Then** ve la lista
+   de los gastos cargados en esa fecha específica.
+3. **Given** el usuario toca un día sin gastos, **When** se muestra la selección, **Then** ve un
+   estado vacío para ese día en lugar de una lista en blanco.
+
+---
+
+### User Story 7 - Crear categorías propias (Priority: P4)
+
+Como usuario quiero poder crear mis propias categorías además de las que ya vienen predefinidas,
+para clasificar gastos que no encajan bien en ninguna de las existentes.
+
+**Why this priority**: Las categorías predefinidas cubren la mayoría de los casos de uso; crear
+categorías propias es una mejora de personalización, no un bloqueante del flujo principal.
+
+**Independent Test**: Se puede probar sola creando una categoría nueva con nombre/color/emoji y
+verificando que aparece disponible para elegir al cargar un gasto.
+
+**Acceptance Scenarios**:
+
+1. **Given** la pantalla de categorías, **When** el usuario crea una categoría con un nombre, un
+   color y un emoji válidos, **Then** la nueva categoría queda disponible en el selector del
+   formulario de gastos.
+2. **Given** el usuario intenta crear una categoría sin nombre, **When** intenta guardar, **Then**
+   se muestra un error de validación y no se crea la categoría.
+3. **Given** dos categorías con el mismo nombre (ignorando mayúsculas/espacios), **When** el
+   usuario intenta crear la segunda, **Then** se rechaza para evitar duplicados confusos.
 
 ### Edge Cases
 
@@ -135,6 +183,8 @@ verificando que el resumen calcula el total general y el total por cada categor�
   válido.
 - ¿Qué pasa si el usuario navega al detalle de un gasto que ya no existe (id inválido)? Debe
   volver al listado en lugar de mostrar una pantalla rota.
+- ¿Qué pasa si se elimina el último gasto de una categoría recién creada? La categoría sigue
+  existiendo (solo se borra el gasto, no la categoría) y sigue disponible para usar de nuevo.
 
 ## Requirements *(mandatory)*
 
@@ -155,23 +205,32 @@ verificando que el resumen calcula el total general y el total por cada categor�
   guardar.
 - **FR-008**: El sistema MUST validar que la descripción tenga al menos 3 caracteres antes de
   permitir guardar.
-- **FR-009**: El sistema MUST requerir que se seleccione una categoría de una lista cerrada
-  (Comida, Transporte, Servicios, Ocio, Otros) antes de permitir guardar.
+- **FR-009**: El sistema MUST requerir que se seleccione una categoría (predefinida o creada por
+  el usuario) antes de permitir guardar un gasto.
 - **FR-010**: Los usuarios MUST poder editar los datos de un gasto existente desde su pantalla de
   detalle, con las mismas validaciones que el alta.
 - **FR-011**: Los usuarios MUST poder eliminar un gasto existente desde su pantalla de detalle,
   previa confirmación.
-- **FR-012**: El sistema MUST mostrar una pantalla de resumen con el total general gastado y el
-  total agrupado por cada categoría.
+- **FR-012**: El sistema MUST mostrar una pantalla de resumen con el total general gastado, el
+  total agrupado por cada categoría, y un gráfico de torta con esas proporciones.
 - **FR-013**: El sistema MUST obtener y modificar los datos exclusivamente a través de una capa
   de servicios mock con latencia artificial de 500–1000 ms; no debe existir ninguna llamada a un
   backend real.
+- **FR-014**: El sistema MUST ofrecer una pantalla de calendario que marque los días con al menos
+  un gasto cargado, y muestre los gastos de un día al tocarlo.
+- **FR-015**: Los usuarios MUST poder crear categorías nuevas (nombre, color, emoji) además de
+  las predefinidas, desde una pantalla dedicada.
+- **FR-016**: El sistema MUST rechazar la creación de una categoría sin nombre o con un nombre
+  duplicado (ignorando mayúsculas y espacios) respecto a una categoría existente.
 
 ### Key Entities
 
 - **Gasto**: representa un movimiento de dinero cargado por el usuario. Atributos: identificador
-  único, monto (número positivo), descripción (texto corto), categoría (una de un conjunto
-  cerrado: Comida, Transporte, Servicios, Ocio, Otros), fecha de creación.
+  único, monto (número positivo), descripción (texto corto), id de categoría (referencia a una
+  `Categoria`), fecha de creación.
+- **Categoria**: representa un tipo de gasto. Atributos: identificador único, nombre, color
+  (para chips y gráficos), emoji. Existen categorías predefinidas cargadas de fábrica y
+  categorías creadas por el usuario; ambas se tratan igual una vez creadas.
 
 ## Success Criteria *(mandatory)*
 
@@ -193,11 +252,12 @@ verificando que el resumen calcula el total general y el total por cada categor�
 - Backend real, sincronización en la nube o acceso multi-dispositivo.
 - Persistencia obligatoria: `AsyncStorage` queda como mejora opcional; si no se implementa, los
   datos se reinician al cerrar la app.
-- Gráficos o reportes avanzados (barras, tortas, tendencias históricas): el resumen es solo texto
-  con totales.
+- Tendencias históricas o comparación entre meses/años (el gráfico es una torta del estado
+  actual, no una serie temporal).
 - Soporte multi-moneda o conversión de moneda.
-- Edición, creación o eliminación de categorías por parte del usuario: la lista de categorías es
-  fija y está definida en el código.
+- Edición o eliminación de categorías existentes (predefinidas o creadas): solo se permite
+  **crear** categorías nuevas, no editar ni borrar las existentes, para no dejar gastos
+  huérfanos apuntando a una categoría que ya no existe.
 
 ## Assumptions
 
@@ -205,4 +265,5 @@ verificando que el resumen calcula el total general y el total por cada categor�
 - Los datos viven en memoria durante la sesión de la app; no se garantiza que persistan al cerrar
   la app salvo que se implemente la mejora opcional con `AsyncStorage`.
 - No se requiere conexión a internet porque no existe backend real.
-- Las categorías disponibles son fijas: Comida, Transporte, Servicios, Ocio, Otros.
+- Existe un conjunto de categorías predefinidas de fábrica, y el usuario puede sumar categorías
+  propias; ambas conviven en la misma lista sin distinción visual obligatoria.

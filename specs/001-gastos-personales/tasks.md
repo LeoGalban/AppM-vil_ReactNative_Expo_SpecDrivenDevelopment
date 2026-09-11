@@ -129,19 +129,92 @@ restante y confirmar que el listado vuelve al estado vacío.
 
 ---
 
-## Phase 7: User Story 5 - Ver un resumen de gastos (Priority: P3)
+## Phase 7: User Story 5 - Ver un resumen de gastos con gráfico (Priority: P3)
 
-**Goal**: ver el total general y el total por categoría.
+**Goal**: ver el total general, el total por categoría y un gráfico de torta.
 
 **Independent Test**: cargar gastos en al menos dos categorías distintas y verificar que los
-totales del resumen son correctos.
+totales y el gráfico del resumen son correctos.
 
 - [ ] T019 [US5] Implementar `app/resumen.tsx`: llama a `listarGastos()`, calcula el total general
       y un total por cada categoría presente, maneja estado de carga y estado vacío.
 - [ ] T020 [US5] Agregar navegación desde `app/index.tsx` hacia `/resumen` (botón o ícono en el
       header del `Stack`).
+- [ ] T020b [US5] Instalar `react-native-svg` y `react-native-chart-kit` con `npx expo install`, y
+      agregar un `PieChart` a `app/resumen.tsx` con una porción por categoría (mismo color que el
+      resto de la app).
 
-**Checkpoint**: cargar gastos variados y confirmar a mano que los totales del resumen suman bien.
+**Checkpoint**: cargar gastos variados y confirmar a mano que los totales y el gráfico coinciden.
+
+---
+
+## Phase 9: Refactor - Categorías como entidad propia (bloqueante para US6/US7)
+
+**Purpose**: antes de sumar categorías creadas por el usuario, las categorías dejan de ser un
+tipo unión fijo (`"Comida" | "Transporte" | ...`) y pasan a ser objetos con id, nombre, color y
+emoji, servidos por un mock propio. Esto toca todo lo que ya usaba `Categoria` como string.
+
+- [ ] T025 Redefinir `Categoria` en `types/gasto.ts` como `{ id, nombre, color, emoji }`, y cambiar
+      `Gasto.categoria` (string) por `Gasto.categoriaId` (string).
+- [ ] T026 Crear `constants/categoriasPorDefecto.ts` con la semilla de categorías de fábrica
+      (ampliadas: Comida, Transporte, Servicios, Ocio, Salud, Educación, Hogar, Mascotas, Ropa,
+      Otros) con id, nombre, color y emoji.
+- [ ] T027 Crear `services/categoriasService.ts`: `listarCategorias()` (devuelve la semilla más
+      las creadas por el usuario, con latencia simulada) y `crearCategoria(datos)` (valida nombre
+      no vacío y no duplicado, genera id, la agrega en memoria).
+- [ ] T028 Crear `components/SelectorCategoria.tsx`: recibe la lista de categorías y la
+      seleccionada, renderiza los chips (mismo diseño que ya existía en `FormularioGasto`).
+- [ ] T029 Actualizar `FormularioGasto.tsx` para pedir la lista de categorías por props (en vez de
+      importar la constante fija) y usar `SelectorCategoria`.
+- [ ] T030 Actualizar `TarjetaGasto.tsx`, `app/gasto/[id].tsx` y `app/resumen.tsx` para resolver
+      nombre/color/emoji de la categoría a partir del `categoriaId` (reciben la lista de
+      categorías ya cargada, o la piden ellos mismos con `listarCategorias()`).
+
+**Checkpoint**: la app sigue funcionando igual que antes del refactor (listar, agregar, editar,
+eliminar, resumen), ahora resolviendo la categoría por id en vez de por string fijo.
+
+---
+
+## Phase 10: User Story 6 - Ver los gastos en un calendario (Priority: P4)
+
+**Goal**: calendario mensual con los días que tienen gastos marcados; tocar un día muestra sus
+gastos.
+
+**Independent Test**: cargar gastos en distintas fechas del mes y verificar que el calendario
+marca esos días, y que tocar uno muestra solo los gastos de esa fecha.
+
+- [ ] T031 [US6] Instalar `react-native-calendars` con `npx expo install`.
+- [ ] T032 [US6] Implementar `app/calendario.tsx`: llama a `listarGastos()`, arma un objeto de
+      "días marcados" (`markedDates`) a partir de las fechas con gastos, y renderiza el
+      componente `Calendar`.
+- [ ] T033 [US6] Al tocar un día, mostrar debajo del calendario la lista de gastos de esa fecha
+      (reutilizando `TarjetaGasto` y `EstadoVacio` si no hay gastos ese día).
+- [ ] T034 [US6] Agregar navegación desde `app/index.tsx` hacia `/calendario` (ícono en el
+      header).
+
+**Checkpoint**: cargar gastos en 2-3 fechas distintas y verificar que el calendario los marca
+correctamente y que tocar cada fecha muestra los gastos correctos.
+
+---
+
+## Phase 11: User Story 7 - Crear categorías propias (Priority: P4)
+
+**Goal**: pantalla para ver todas las categorías y crear nuevas.
+
+**Independent Test**: crear una categoría nueva y verificar que aparece disponible en el selector
+del formulario de gastos.
+
+- [ ] T035 [US7] Implementar `app/categorias.tsx`: lista las categorías (`listarCategorias()`)
+      mostrando emoji, nombre y color de cada una.
+- [ ] T036 [US7] Agregar un formulario simple dentro de la misma pantalla (nombre + elegir color
+      de una paleta fija + elegir emoji de una lista corta) que llama a `crearCategoria` y
+      refresca la lista.
+- [ ] T037 [US7] Validar en el formulario: nombre obligatorio, sin duplicados (mismo mensaje que
+      devuelve el service), color y emoji obligatorios.
+- [ ] T038 [US7] Agregar navegación desde `app/index.tsx` o `app/_layout.tsx` hacia `/categorias`.
+
+**Checkpoint**: crear una categoría nueva y confirmar que aparece en el selector al cargar un
+gasto nuevo.
 
 ---
 

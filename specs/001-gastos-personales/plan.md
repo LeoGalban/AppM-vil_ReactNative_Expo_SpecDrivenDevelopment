@@ -17,10 +17,14 @@ principio I).
 **Language/Version**: TypeScript 6, React 19, React Native 0.86 (vía Expo SDK 57)
 
 **Primary Dependencies**: `expo-router` (navegación por archivos), `react-native-safe-area-context`
-y `react-native-screens` (requeridos por expo-router)
+y `react-native-screens` (requeridos por expo-router); `react-native-svg` + `react-native-chart-kit`
+(gráfico de torta en el resumen, ambos basados en SVG puro, compatibles con Expo Go sin
+`expo prebuild`); `react-native-calendars` (grilla de calendario mensual, también pura JS/Expo Go
+compatible).
 
-**Storage**: Ninguno obligatorio. Los datos viven en un array en memoria dentro de
-`services/gastosService.ts`. `AsyncStorage` queda como mejora opcional (fuera del alcance mínimo).
+**Storage**: Ninguno obligatorio. Los datos viven en arrays en memoria dentro de
+`services/gastosService.ts` y `services/categoriasService.ts`. `AsyncStorage` queda como mejora
+opcional (fuera del alcance mínimo).
 
 **Testing**: Prueba manual en dispositivo real con Expo Go, una vez por tarea completada (no se
 agrega un framework de testing automatizado: está fuera del alcance del prototipo).
@@ -69,7 +73,9 @@ app/
 ├── _layout.tsx              # Stack raíz de expo-router (define las transiciones entre pantallas)
 ├── index.tsx                # Pantalla 1: Listado de gastos (ruta "/")
 ├── nuevo.tsx                 # Pantalla 2: Formulario de alta de gasto (ruta "/nuevo")
-├── resumen.tsx                # Pantalla 3: Resumen por categoría (ruta "/resumen")
+├── resumen.tsx                # Pantalla 3: Resumen + gráfico de torta (ruta "/resumen")
+├── calendario.tsx              # Pantalla 5: Calendario mensual (ruta "/calendario")
+├── categorias.tsx               # Pantalla 6: Listado + alta de categorías (ruta "/categorias")
 └── gasto/
     └── [id].tsx               # Pantalla 4: Detalle + edición de un gasto (ruta "/gasto/123")
 
@@ -77,25 +83,29 @@ components/
 ├── TarjetaGasto.tsx          # Ítem individual de la lista (fecha, monto, categoría, descripción)
 ├── EstadoCarga.tsx            # Indicador de carga reutilizable (spinner + texto)
 ├── EstadoVacio.tsx             # Mensaje reutilizable de "no hay gastos todavía"
-└── FormularioGasto.tsx         # Formulario con validación, reutilizado por alta y edición
+├── FormularioGasto.tsx         # Formulario con validación, reutilizado por alta y edición
+└── SelectorCategoria.tsx        # Chips de categoría reutilizados por el formulario de gastos
 
 services/
-└── gastosService.ts           # Mock: listarGastos, obtenerGasto, crearGasto, editarGasto,
-                                # eliminarGasto — todas async con latencia simulada
+├── gastosService.ts           # Mock: listarGastos, obtenerGasto, crearGasto, editarGasto,
+│                               # eliminarGasto — todas async con latencia simulada
+└── categoriasService.ts        # Mock: listarCategorias (predefinidas + creadas), crearCategoria
 
 types/
 └── gasto.ts                    # Tipos TypeScript: Gasto, Categoria
 
 constants/
-└── categorias.ts                # Lista cerrada de categorías (Comida, Transporte, Servicios,
-                                  # Ocio, Otros)
+├── colores.ts                   # Paleta general de la app
+└── categoriasPorDefecto.ts       # Semilla de categorías predefinidas (nombre, color, emoji)
 ```
 
 **Structure Decision**: proyecto único (mobile-app), sin separación frontend/backend porque no
 hay backend. `app/` queda reservado exclusivamente para pantallas de expo-router (regla del
 propio framework); toda la lógica reutilizable vive fuera, en `components/`, `services/`,
 `types/` y `constants/`, para que las pantallas queden simples y fáciles de explicar en la
-defensa.
+defensa. Las categorías dejan de ser un tipo unión fijo y pasan a ser una entidad propia servida
+por `categoriasService.ts`, para poder sumar categorías creadas por el usuario sin tocar el tipo
+`Gasto`.
 
 ## Complexity Tracking
 
