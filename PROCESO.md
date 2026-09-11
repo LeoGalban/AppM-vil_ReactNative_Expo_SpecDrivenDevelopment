@@ -3,77 +3,81 @@
 Trabajo Práctico N.° 1 — Taller Complementario React Native II. Desarrollo de un prototipo con
 Spec-Driven Development (SDD).
 
-Integrante/s: _(completar nombre y apellido)_
-
----
+Integrante: Leonel Rolando Galban Rojas
 
 ## 1. Investigación
 
-> Responder cada pregunta con palabras propias, citando las fuentes consultadas (link o
-> referencia). No copiar texto tal cual de ningún lado: se comparte en una puesta en común oral.
+
 
 ### React Native
 
-**¿Qué es y qué problema resuelve? ¿Cómo logra que código JavaScript termine mostrando
-componentes nativos en el teléfono?**
+**¿Qué es y qué problema resuelve? ¿Cómo logra que código JavaScript termine mostrando componentes nativos en el teléfono?**
 
-_(completar)_
+_React Native (creado por Facebook/Meta) te deja escribir la interfaz en JavaScript/TypeScript con la sintaxis de React, pero en vez de renderizar HTML, traduce esos componentes a componentes nativos reales de iOS y Android. El problema que resuelve: antes había que escribir y mantener dos apps separadas (una en Kotlin/Java para Android, otra en Swift/Objective-C para iOS). Con RN se comparte la mayor parte del código.
 
-**¿En qué se diferencia del desarrollo nativo puro (Kotlin/Swift) y de las apps híbridas basadas
-en web (Ionic, PWA)? Ventajas y desventajas de cada enfoque.**
+Cómo funciona técnicamente:el código JS corre en un motor JavaScript (Hermes, el que usa Expo por defecto) separado del hilo nativo. Antes se comunicaban por un "Bridge" asíncrono serializando JSON; la arquitectura actual se llama New Architecture, y usa JSI (JavaScript Interface) para que JS y código nativo se llamen directamente sin ese bridge, más Fabric (el renderer nuevo) y TurboModules (módulos nativos que se cargan bajo demanda)_
 
-_(completar)_
+**¿En qué se diferencia del desarrollo nativo puro (Kotlin/Swift) y de las apps híbridas basadas en web (Ionic, PWA)? Ventajas y desventajas de cada enfoque.**
+
+*Nativo puro: máximo rendimiento y acceso total al SDK del sistema operativo, pero hay que escribir y mantener dos códigos distintos (más tiempo/costo).
+*Híbridas basadas en web (Ionic, PWA): renderizan HTML/CSS dentro de un WebView; se comparte casi el 100% del código, pero la UI no es nativa de verdad (se siente "como una página web"), y el acceso a hardware suele depender de plugins.
+*React Native: intermedio — componentes nativos reales (buena performance y sensación nativa) con un solo código base para ambas plataformas, aunque para funciones muy específicas del hardware a veces hay que escribir un módulo nativo puntual.
+
+3 apps conocidas hechas con React Native: Instagram, Discord y Shopify son ejemplos documentados oficialmente.
 
 **Nombren 3 apps conocidas construidas con React Native.**
 
-_(completar)_
+*Instagram
+*Dicord
+*Shopify
+
 
 **Fuentes:**
-_(completar)_
+ https://reactnative.dev/architecture/overview
+ https://reactnative.dev/showcase
 
----
 
 ### Expo
 
-**¿Qué agrega Expo sobre React Native "pelado"? ¿Qué es Expo Go y por qué facilita probar en el
-teléfono?**
-
-_(completar)_
+Expo es un conjunto de herramientas y servicios sobre React Native: CLI, un runtime con APIs ya listas (cámara, notificaciones, sensores, etc. vía paquetes expo-*), y sobre todo Expo Go, una app movil con el motor de React Native precompilado adentro. Gracias a eso, para probar las app no hace falta compilar nada nativo (no necesitás Android Studio ni Xcode) — Expo Go descarga el código JS por Wi-Fi y lo ejecuta al instante.
 
 **¿Qué es `expo-router` y cómo maneja la navegación?**
 
-_(completar)_
+Es el sistema de navegación oficial de Expo, basado en enrutamiento por archivos: cada archivo dentro de la carpeta app/ se convierte automáticamente en una pantalla y en una ruta navegable, sin tener que declarar manualmente cada Stack.Screen. Por ejemplo, app/gasto/[id].tsx genera una ruta dinámica /gasto/123. Está construido sobre React Navigation por debajo.
 
 **¿Cuándo conviene usar Expo y qué limitaciones tiene?**
 
-_(completar)_
+Conviene para la gran mayoría de apps  porque acelera muchísimo el desarrollo y el testing. La limitación aparece cuando necesitás un módulo nativo muy específico que no está en el SDK de Expo ni tiene versión compatible: ahí Expo Go ya no alcanza y hay que generar un "development build" propio, lo cual complica un poco el flujo (aunque sigue siendo mucho más simple que React Native puro).
 
 **Fuentes:**
-_(completar)_
+https://docs.expo.dev/get-started/set-up-your-environment/ y https://docs.expo.dev/more/glossary-of-terms/#expo-go
+https://docs.expo.dev/router/introduction/
+https://docs.expo.dev/faq/
 
----
 
 ### SDD — Spec-Driven Development
 
-**¿Qué es el desarrollo guiado por especificaciones y por qué apareció junto con los agentes de
-IA? ¿Qué es el "vibe coding" y qué problemas trae?**
+**¿Qué es el desarrollo guiado por especificaciones y por qué apareció junto con los agentes de IA? ¿Qué es el "vibe coding" y qué problemas trae?**
 
-_(completar)_
+SDD es una metodología donde la especificación (qué hay que construir) se escribe antes y de forma tan precisa que se convierte en la fuente de verdad que guía el plan, las tareas y finalmente el código — en vez de que el código sea lo único que documenta qué hace el sistema. Apareció con fuerza junto a los agentes de IA porque estos pueden generar código muy rápido, pero sin una spec clara tienden a inventar alcance, tomar decisiones arbitrarias o perder de vista los requisitos originales.
 
-**¿Cuál es el flujo típico de SDD? (reglas del proyecto → especificación → plan técnico → tareas
-→ implementación)**
+"Vibe coding" es el término (popularizado en 2025) para pedirle a una IA que programe algo "a ojo", iterando por sensación sin specs ni revisión seria del código generado. El problema: se obtiene algo que funciona a corto plazo pero que nadie del equipo entiende del todo, es difícil de mantener, puede tener bugs de seguridad ocultos, y no hay forma de auditar por qué se tomó cada decisión.
 
-_(completar)_
 
-**¿Qué herramientas existen? (GitHub Spec Kit y una alternativa, por ejemplo Kiro). ¿Con qué
-agentes de IA funcionan?**
+**¿Cuál es el flujo típico de SDD? (reglas del proyecto → especificación → plan técnico → tareas → implementación)**
 
-_(completar)_
+Flujo típico de SDD: reglas del proyecto (constitution) → especificación (spec, el qué) → plan técnico (el cómo) → tareas (pasos chicos verificables) → implementación. Spec Kit le agrega un sexto paso, "converge", para revisar que el código final siga alineado con la spec.
+
+**¿Qué herramientas existen? (GitHub Spec Kit y una alternativa, por ejemplo Kiro). ¿Con qué agentes de IA funcionan?**
+
+GitHub Spec Kit: toolkit open source de GitHub, se usa como CLI (specify) que agrega comandos/skills a más de 30 agentes de IA distintos (Claude Code, GitHub Copilot, Cursor, Gemini CLI, etc.).
+Kiro: es de AWS, un IDE/plataforma agéntica propia que integra specs, "hooks" (automatizaciones) y "steering" (reglas persistentes del proyecto) directamente en su flujo, con validación de código mediante tests basados en propiedades.
 
 **Fuentes:**
-_(completar)_
+https://github.com/github/spec-kit
+ https://github.com/github/spec-kit 
+ https://kiro.dev/
 
----
 
 ### Agentes de código y skills
 
@@ -177,12 +181,21 @@ _(completar cuando se reinstale GitHub Spec Kit: qué skills se agregaron y por 
 
 ## 4. Desarrollo guiado por tareas
 
-_(completar por cada tarea de `tasks.md`: prompt utilizado, qué generó la IA, qué se corrigió a
-mano, cómo se verificó en el teléfono, y el commit correspondiente)_
+_(completar el detalle de verificación en el teléfono de cada fila; el resto ya está)_
 
-| Tarea | Prompt usado | Qué generó la IA | Qué se corrigió | Verificación |
-|---|---|---|---|---|
-| | | | | |
+| Tarea | Qué generó la IA | Qué se corrigió | Verificación |
+|---|---|---|---|
+| T001–T004 (Setup) | Instalación de `expo-router` y dependencias; `main` en `expo-router/entry`; `app/_layout.tsx` con `Stack`; `types/gasto.ts`; `constants/categorias.ts` | Sin correcciones | `npx tsc --noEmit` sin errores. _(completar: prueba en teléfono)_ |
+| T005–T006 (Foundational) | `services/gastosService.ts` con 3 gastos mock y `listarGastos()` con latencia 500–1000ms; `EstadoCarga` y `EstadoVacio` | Sin correcciones | _(completar)_ |
+| T007–T008 (US1 - Listado) | `TarjetaGasto.tsx`; `app/index.tsx` con estados carga/vacío/datos y `FlatList` | Se agregó `useFocusEffect` para refrescar la lista al volver de otra pantalla (no estaba en el plan original) | _(completar)_ |
+| Diseño visual | Paleta en `constants/colores.ts`, color+emoji por categoría en `constants/categorias.ts`, rediseño de `TarjetaGasto`, `EstadoCarga`, `EstadoVacio` y header del `Stack` | A pedido, sin librerías nuevas (solo emojis, sin `@expo/vector-icons`) | _(completar)_ |
+| T009–T012 (US2 - Agregar gasto) | `crearGasto` en el servicio; `FormularioGasto.tsx` con validación de monto/descripción/categoría; `app/nuevo.tsx`; botón "+" en el header | Sin correcciones | _(completar)_ |
+| T013–T015 (US3 - Detalle) | `obtenerGasto` en el servicio; `app/gasto/[id].tsx` (vista de detalle); navegación desde `TarjetaGasto` | Sin correcciones | _(completar)_ |
+| T016–T018 (US4 - Editar/eliminar) | `editarGasto` y `eliminarGasto` en el servicio; modo edición reutilizando `FormularioGasto` dentro de `app/gasto/[id].tsx`; botón eliminar con `Alert.alert` de confirmación | Sin correcciones | _(completar)_ |
+| T019–T020 (US5 - Resumen) | `app/resumen.tsx` con total general y barras de progreso por categoría; botón de acceso en el header | Sin correcciones | _(completar)_ |
+
+**Nota**: T021 (revisión de UX), T022 (AsyncStorage opcional), T023 (AGENTS.md real) y T024
+(capturas finales) quedan pendientes.
 
 ---
 
