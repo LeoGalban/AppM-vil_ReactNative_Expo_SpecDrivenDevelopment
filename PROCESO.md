@@ -185,17 +185,27 @@ _(completar el detalle de verificación en el teléfono de cada fila; el resto y
 
 | Tarea | Qué generó la IA | Qué se corrigió | Verificación |
 |---|---|---|---|
-| T001–T004 (Setup) | Instalación de `expo-router` y dependencias; `main` en `expo-router/entry`; `app/_layout.tsx` con `Stack`; `types/gasto.ts`; `constants/categorias.ts` | Sin correcciones | `npx tsc --noEmit` sin errores. _(completar: prueba en teléfono)_ |
+| T001–T004 (Setup) | Instalación de `expo-router` y dependencias; `main` en `expo-router/entry`; `app/_layout.tsx` con `Stack`; `types/gasto.ts`; lista inicial de categorías fijas | Sin correcciones | `npx tsc --noEmit` sin errores. _(completar: prueba en teléfono)_ |
 | T005–T006 (Foundational) | `services/gastosService.ts` con 3 gastos mock y `listarGastos()` con latencia 500–1000ms; `EstadoCarga` y `EstadoVacio` | Sin correcciones | _(completar)_ |
 | T007–T008 (US1 - Listado) | `TarjetaGasto.tsx`; `app/index.tsx` con estados carga/vacío/datos y `FlatList` | Se agregó `useFocusEffect` para refrescar la lista al volver de otra pantalla (no estaba en el plan original) | _(completar)_ |
-| Diseño visual | Paleta en `constants/colores.ts`, color+emoji por categoría en `constants/categorias.ts`, rediseño de `TarjetaGasto`, `EstadoCarga`, `EstadoVacio` y header del `Stack` | A pedido, sin librerías nuevas (solo emojis, sin `@expo/vector-icons`) | _(completar)_ |
+| Diseño visual | Paleta en `constants/colores.ts`, color+emoji por categoría, rediseño de `TarjetaGasto`, `EstadoCarga`, `EstadoVacio` y header del `Stack` | A pedido, sin librerías nuevas (solo emojis, sin `@expo/vector-icons`) | _(completar)_ |
 | T009–T012 (US2 - Agregar gasto) | `crearGasto` en el servicio; `FormularioGasto.tsx` con validación de monto/descripción/categoría; `app/nuevo.tsx`; botón "+" en el header | Sin correcciones | _(completar)_ |
 | T013–T015 (US3 - Detalle) | `obtenerGasto` en el servicio; `app/gasto/[id].tsx` (vista de detalle); navegación desde `TarjetaGasto` | Sin correcciones | _(completar)_ |
 | T016–T018 (US4 - Editar/eliminar) | `editarGasto` y `eliminarGasto` en el servicio; modo edición reutilizando `FormularioGasto` dentro de `app/gasto/[id].tsx`; botón eliminar con `Alert.alert` de confirmación | Sin correcciones | _(completar)_ |
-| T019–T020 (US5 - Resumen) | `app/resumen.tsx` con total general y barras de progreso por categoría; botón de acceso en el header | Sin correcciones | _(completar)_ |
+| T019–T020b (US5 - Resumen) | `app/resumen.tsx` con total general, barras por categoría y gráfico `PieChart` de `react-native-chart-kit` | Sin correcciones | _(completar)_ |
+| T025–T030 (Refactor categorías) | `Categoria` pasa de string fijo a entidad `{id, nombre, color, emoji}`; `Gasto.categoria` → `Gasto.categoriaId`; `categoriasService.ts`; `SelectorCategoria.tsx`; se actualizaron `FormularioGasto`, `TarjetaGasto`, `index`, `nuevo`, `gasto/[id]` y `resumen` para resolver la categoría por id | Ampliación pedida a mitad de proyecto: se actualizó `spec.md` (nuevas US6/US7, se sacó "gráficos"/"categorías fijas" de Fuera de Alcance) antes de tocar código | _(completar)_ |
+| T031–T034 (US6 - Calendario) | `app/calendario.tsx` con `react-native-calendars`: marca los días con gastos, toca un día → lista de gastos de esa fecha | Sin correcciones | _(completar)_ |
+| T035–T038 (US7 - Categorías propias) | `app/categorias.tsx`: lista categorías + formulario para crear una nueva (nombre, color de paleta, emoji de una lista fija), con validación de nombre vacío/duplicado | Sin correcciones | _(completar)_ |
 
-**Nota**: T021 (revisión de UX), T022 (AsyncStorage opcional), T023 (AGENTS.md real) y T024
-(capturas finales) quedan pendientes.
+**Nota**: T021 (revisión de UX), T022 (AsyncStorage opcional) y T024 (capturas finales) quedan
+pendientes. T023 (AGENTS.md real) sigue pendiente.
+
+**Sobre la ampliación de alcance**: la app arrancó con el alcance mínimo de la consigna (listado,
+alta, detalle, resumen simple). A mitad del desarrollo se pidió ampliarla (más categorías,
+calendario visual, gráfico real, categorías creadas por el usuario) para que se sienta como una
+app real y no solo un prototipo mínimo. Se optó por actualizar `spec.md`/`plan.md`/`tasks.md`
+*antes* de programar, siguiendo la regla de oro de SDD, en vez de agregar funcionalidad
+directamente sin dejarlo documentado.
 
 ---
 
