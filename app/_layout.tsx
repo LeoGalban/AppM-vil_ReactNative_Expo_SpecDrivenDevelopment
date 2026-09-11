@@ -18,6 +18,12 @@ export default function LayoutRaiz() {
           title: "Mis Gastos",
           headerRight: () => (
             <View style={estilos.filaBotonesHeader}>
+              <Link href="/calendario">
+                <Text style={estilos.botonHeader}>🗓️</Text>
+              </Link>
+              <Link href="/categorias">
+                <Text style={estilos.botonHeader}>🏷️</Text>
+              </Link>
               <Link href="/resumen">
                 <Text style={estilos.botonHeader}>📊</Text>
               </Link>
@@ -30,6 +36,8 @@ export default function LayoutRaiz() {
       />
       <Stack.Screen name="nuevo" options={{ title: "Nuevo gasto" }} />
       <Stack.Screen name="resumen" options={{ title: "Resumen" }} />
+      <Stack.Screen name="calendario" options={{ title: "Calendario" }} />
+      <Stack.Screen name="categorias" options={{ title: "Categorías" }} />
       <Stack.Screen name="gasto/[id]" options={{ title: "Detalle del gasto" }} />
     </Stack>
   );
@@ -39,14 +47,14 @@ const estilos = StyleSheet.create({
   filaBotonesHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 14,
   },
   botonHeader: {
-    fontSize: 18,
+    fontSize: 17,
   },
   botonHeaderMas: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "400",
   },
 });
